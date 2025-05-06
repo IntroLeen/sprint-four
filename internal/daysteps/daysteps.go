@@ -23,48 +23,43 @@ func parsePackage(data string) (int, time.Duration, error) {
 
 	parts := strings.Split(data, ",")
 	if len(parts) != 2 {
-		err := errors.New("неверный формат данных: ожидается 2 элемента")
-		log.Println(err)
-		return 0, 0, err
+		log.Println("invalid data format: expected 2 elements")
+		return 0, 0, errors.New("invalid data format: expected 2 elements")
 	}
 	//тут я уже отчаялся
 	if strings.HasPrefix(data, " ") || strings.HasSuffix(data, " ") {
-		err := errors.New("данные содержат пробелы в начале или конце")
-		log.Println(err)
-		return 0, 0, err
+
+		log.Println("the data contains spaces at the beginning or end")
+		return 0, 0, errors.New("the data contains spaces at the beginning or end")
 	}
 	stepsStr := strings.TrimSpace(parts[0])
 	if parts[0] != stepsStr { // Проверка на наличие пробелов в начале или конце шага
-		err := errors.New("количество шагов содержит лишние пробелы")
-		log.Println(err)
-		return 0, 0, err
+
+		log.Println("the number of steps contains extra spaces")
+		return 0, 0, errors.New("the number of steps contains extra spaces")
 	}
 	// преобразуем кол-во шагов и проверяем на ошибку
 	steps, err := strconv.Atoi(strings.TrimSpace(parts[0]))
 	if err != nil {
-		err = errors.New("не удалось преобразовать кол-во шагов в число: " + err.Error())
-		log.Println(err)
-		return 0, 0, err
+
+		return 0, 0, fmt.Errorf("failed to convert number of steps to number: %w", err)
 	}
 
 	// проверка шагов
 	if steps <= 0 {
-		err := errors.New("количество шагов должно быть больше 0")
-		log.Println(err)
-		return 0, 0, err
+		log.Println("the number of steps must be greater than 0")
+		return 0, 0, errors.New("the number of steps must be greater than 0")
 	}
 
 	// преобразуем время и проверяем на ошибку
 	duration, err := time.ParseDuration(strings.TrimSpace(parts[1]))
 	if err != nil {
-		err = errors.New("не удалось преобразовать время: " + err.Error())
-		log.Println(err)
-		return 0, 0, err
+		return 0, 0, fmt.Errorf("failed to convert time:  %w", err)
 	}
 	if duration <= 0 {
-		err := errors.New("количество шагов должно быть больше 0")
-		log.Println(err)
-		return 0, 0, err
+
+		log.Println("the number of steps must be greater than 0")
+		return 0, 0, errors.New("the number of steps must be greater than 0")
 	}
 
 	return steps, duration, nil
@@ -74,7 +69,7 @@ func DayActionInfo(data string, weight, height float64) string {
 	steps, duration, err := parsePackage(data)
 	//проверки
 	if err != nil {
-		log.Println("Ошибка при парсинге данных:", err)
+		log.Printf("Error while parsing data: %v", err)
 		return ""
 	}
 	if steps <= 0 {
@@ -85,7 +80,7 @@ func DayActionInfo(data string, weight, height float64) string {
 	distanceInKm := distanceInMeters / mInKm
 	calories, calErr := spentcalories.WalkingSpentCalories(steps, weight, height, duration)
 	if calErr != nil {
-		log.Println("Ошибка при расчете калорий:", calErr)
+		log.Printf("Error in calorie calculation: %v", calErr)
 		return ""
 	}
 

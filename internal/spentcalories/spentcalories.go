@@ -21,29 +21,27 @@ const (
 func parseTraining(data string) (int, string, time.Duration, error) {
 	parts := strings.Split(data, ",")
 	if len(parts) != 3 {
-		err := errors.New("неверный формат данных: ожидается 3 элемента")
-		log.Println(err)
-		return 0, "", 0, err
+
+		log.Println("invalid data format: expected 3 elements")
+		return 0, "", 0, errors.New("invalid data format: expected 3 elements")
 	}
 
 	steps, err := strconv.Atoi(strings.TrimSpace(parts[0]))
 	if err != nil {
-		err = errors.New("не удалось преобразовать кол-во шагов в число: " + err.Error())
-		log.Println(err)
-		return 0, "", 0, err
+
+		return 0, "", 0, fmt.Errorf("failed to convert number of steps to number: %w", err)
 	}
 
 	activity := strings.TrimSpace(parts[1])
 	duration, err := time.ParseDuration(strings.TrimSpace(parts[2]))
 	if err != nil {
-		err = errors.New("не удалось преобразовать время: " + err.Error())
-		log.Println(err)
-		return 0, "", 0, err
+
+		return 0, "", 0, fmt.Errorf("failed to convert time: %w", err)
 	}
 	if steps <= 0 || duration <= 0 {
-		err := errors.New("некорректные входные параметры для бега")
-		log.Println(err)
-		return 0, "", 0, err
+
+		log.Println("Incorrect input parameters for running")
+		return 0, "", 0, errors.New("incorrect input parameters for running")
 	}
 
 	return steps, activity, duration, nil
@@ -84,9 +82,9 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 	case "Бег":
 		calories, err = RunningSpentCalories(steps, weight, height, duration)
 	default:
-		err = errors.New("неизвестный тип тренировки")
-		log.Println(err)
-		return "", err
+
+		log.Println("неизвестный тип тренировкиg")
+		return "", errors.New("неизвестный тип тренировкиg")
 	}
 
 	if err != nil {
@@ -105,10 +103,10 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 }
 
 func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
-	if steps <= 0 || weight <= 0 || duration <= 0 {
-		err := errors.New("некорректные входные параметры для бега")
-		log.Println(err)
-		return 0, err
+	if steps <= 0 || weight <= 0 || duration <= 0 || height <= 0 {
+
+		log.Println("Incorrect input parameters for running")
+		return 0, errors.New("incorrect input parameters for running")
 	}
 	speed := meanSpeed(steps, height, duration)
 	durationInMinutes := duration.Minutes()
@@ -119,9 +117,9 @@ func RunningSpentCalories(steps int, weight, height float64, duration time.Durat
 
 func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
 	if steps <= 0 || weight <= 0 || height <= 0 || duration <= 0 {
-		err := errors.New("некорректные входные параметры для ходьбы")
-		log.Println(err)
-		return 0, err
+
+		log.Println("Incorrect input parameters for walking")
+		return 0, errors.New("incorrect input parameters for walking")
 	}
 	speed := meanSpeed(steps, height, duration)
 	durationInMinutes := duration.Minutes()
